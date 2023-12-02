@@ -1,38 +1,49 @@
 {% extends 'myapp/base.html' %}
+{% load custom_filters %}
 {% block title %}Home - PetsBook{% endblock %}
 
 {% block header %}Welcome to PetsBook{% endblock %}
 
 {% block content %}
     <form method="get">
-        <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search">
+        <input id="search-bar" type="text" name="q" value="{{ query|default:'' }}" placeholder="Search">
         <button type="submit">Search</button>
     </form>
 
     {% if query %}
         <h2>Search results for '{{ query }}'</h2>
     {% endif %}
-
+{#    <p>Time now: {% now "F j, Y H:i:s" %}<br>Last Logged in: {{ user.last_login }}</p>#}
     {% for post in posts %}
         <h3>{{ post.title }}</h3>
         <p>{{ post.description }}</p>
         <p>Category: {{ post.category }}</p>
-        <p>Author: {{ post.username }}</p>
-        <form method="post">
-            {% csrf_token %}
-            {% if not post.is_flagged %}
+        {% if user.username != post.username  %}
+            <p>Author: {{ post.username }}</p>
+            <form method="post">
+                {% csrf_token %}
+                {% if not post.is_flagged %}
                     <button type="submit" name="action" value="flag">Flag</button>
-            {% else %}
-                <label style="color: red">Flagged</label>
-            {% endif %}
-            <input type="hidden" name="post_id" value="{{ post.id }}">
-            <input type="hidden" name="title" value="{{ post.title }}">
-            <input type="hidden" name="description" value="{{ post.description }}">
-            <input type="hidden" name="category" value="{{ post.category }}">
-            <input type="text" name="tags" placeholder="Tag this post">
-            <button type="submit" name="action" value="tag">Add Tag</button>
-        </form>
-        <p>{{ post.tags }}</p>
+                {% else %}
+                    <label style="color: red">Flagged</label>
+                {% endif %}
+                <input type="hidden" name="post_id" value="{{ post.id }}">
+                <input type="hidden" name="title" value="{{ post.title }}">
+                <input type="hidden" name="description" value="{{ post.description }}">
+                <input type="hidden" name="category" value="{{ post.category }}">
+                <input type="text" name="tags" placeholder="Tag this post">
+                <button type="submit" name="action" value="tag">Add Tag</button>
+            </form>
+        {% else %}
+            <p>Author: You</p>
+        {% endif %}
+        {% if post.tags %}
+            {% for tag in post.tags|split_tags %}
+                {% if tag %}
+                    <div id="tag-style">{{ tag }}</div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
         <hr>
     {% endfor %}
 {% endblock %}

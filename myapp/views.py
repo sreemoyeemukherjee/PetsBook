@@ -11,10 +11,13 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
+
+
 @login_required
 def addPost(request):
     if request.method == 'POST':
         form = PostForm(request.POST)
+        print(form)
         if form.is_valid():
             post = form.save(commit=False)
             post.username = request.user.username
@@ -23,13 +26,18 @@ def addPost(request):
     else:
         form = PostForm()
     return render(request, 'myapp/addPost.html', {'form': form})
+
+
 def home(request):
     return render(request, 'myapp/home.html')
+
 
 def user_logout(request):
     logout(request)
     # Redirect to the home page or another page after logout
     return redirect('home')
+
+
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -42,8 +50,9 @@ def signup(request):
             messages.error(request, 'Signup failed. Please correct the errors.')
     else:
         form = SignUpForm()
-    random_posts = Post.objects.order_by('?')[:3]  # Retrieve 3 random posts
+    random_posts = Post.objects.filter(is_flagged=False).order_by('?')[:3]  # Retrieve 3 random posts
     return render(request, 'myapp/registration/signup.html', {'form': form, 'random_posts': random_posts})
+
 
 def user_login(request):
     if request.method == 'POST':
@@ -57,8 +66,14 @@ def user_login(request):
                 return redirect('home')  # Change 'home' to your home page URL
     else:
         form = AuthenticationForm()
-    random_posts = Post.objects.order_by('?')[:3]  # Retrieve 3 random posts
+    random_posts = Post.objects.filter(is_flagged=False).order_by('?')[:3]  # Retrieve 3 random posts
     return render(request, 'myapp/registration/login.html', {'form': form, 'random_posts': random_posts})
+
+
+def badges(request):
+    count = Post.objects.filter(username=request.user).count()
+    return render(request, 'myapp/badges.html', {'count': count})
+
 
 class PostListView(LoginRequiredMixin, View):
     def get(self, request):
@@ -67,16 +82,19 @@ class PostListView(LoginRequiredMixin, View):
         return render(request, 'myapp/home.html', {'posts': posts, 'query': query})
 
     def post(self, request):
-        tag_form = PostForm(request.POST)  # Create an instance of the form for handling tags
-        if tag_form.is_valid():
+        form = PostForm(request.POST)  # Create an instance of the form for handling tags
+        if form.is_valid():
             post_id = request.POST.get('post_id')
-            # print(tag_form.cleaned_data['action'])
+            # print(form.cleaned_data['action'])
             if request.POST.get('action') == 'tag':
-                tag = tag_form.cleaned_data['tags']
+                tag = form.cleaned_data['tags']
                 if tag and post_id:
                     try:
                         post = Post.objects.get(id=post_id)
-                        post.tags += tag
+                        if post.tags:
+                            post.tags += tag.lower() + "; "
+                        else:
+                            post.tags = tag.lower() + '; '
                         post.save()
                     except Post.DoesNotExist:
                         pass
@@ -94,21 +112,13 @@ class PostListView(LoginRequiredMixin, View):
             posts = Post.objects.filter(
                 Q(username__icontains=query) |
                 Q(title__icontains=query) |
-                Q(description__icontains=query)
+                Q(description__icontains=query) |
+                Q(tags__icontains=query)
             )
         else:
             posts = Post.objects.all()
         return posts
 
-    def flag_post(self, request, post_id):
-        post = get_object_or_404(Post, pk=post_id)
-        if not post.is_flagged:
-            post.is_flagged = True
-            post.save()
-            # additional actions if needed
-        query = request.GET.get('q')
-        posts = self.query_db(query)
-        return render(request, 'myapp/home.html', {'posts': posts, 'query': query})
 
 class CustomLoginView(LoginView):
     def get(self, request, *args, **kwargs):

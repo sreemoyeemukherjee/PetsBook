@@ -1,0 +1,64 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+{% block title %}Badges - PetsBook{% endblock %}
+
+{% block header %}Your Badges{% endblock %}
+
+{% block content %}
+
+    <div  class="image-item">
+        {% if count >= 1 %}
+            <div class="gray-overlay" style="background-color: rgba(0, 0, 0, 0);">
+                <img src="{% static 'level1.jpeg' %}" alt="Level 1" width="100" height="100" style="filter: grayscale(0%);">
+                <label style="color: #000"><b>Level 1: </b><br>You created your first post!<br>Kitty says Hiii</label>
+            </div>
+        {% else %}
+            <div class="gray-overlay">
+                <img src="{% static 'level1.jpeg' %}" alt="Level 1" width="100" height="100">
+                <label><b>Level 1: </b><br>You created your first post!<br>Kitty says Hiii</label>
+            </div>
+        {% endif %}
+    </div>
+
+
+
+    <div class="image-item">
+        {% if count >= 3%}
+            <div class="gray-overlay" style="background-color: rgba(0, 0, 0, 0);">
+                <img src="{% static 'level2.jpeg' %}" alt="Level 2" width="100" height="100" style="filter: grayscale(0%);">
+                <label style="color: #000"><b>Level 2: </b><br>You are on a streak with 3+ posts!<br>Alright! You got Mr. P's attention</label>
+            </div>
+        {% else %}
+            <div class="gray-overlay">
+                <img src="{% static 'level2.jpeg' %}" alt="Level 2" width="100" height="100">
+                <label><b>Level 2: </b><br>You are on a streak with 3+ posts!<br>Alright! You got Mr. P's attention</label>
+            </div>
+        {% endif %}
+    </div>
+    <div class="image-item">
+        {% if count >= 6%}
+            <div class="gray-overlay" style="background-color: rgba(0, 0, 0, 0);">
+                <img src="{% static 'level3.jpeg' %}" alt="Level 3" width="100" height="100" style="filter: grayscale(0%);">
+                <label style="color: #000"><b>Level 3: </b><br>We love your contributions to PetsBook, you made 6+ posts<br>Charlie & Kitty sends &#10084; whauff &#10084; your way</label>
+            </div>
+        {% else %}
+            <div class="gray-overlay">
+                <img src="{% static 'level3.jpeg' %}" alt="Level 3" width="100" height="100">
+                <label><b>Level 3: </b><br>We love your contributions to PetsBook, you made 6+ posts<br>Charlie & Kitty sends &#10084; whauff &#10084; your way</label>
+            </div>
+        {% endif %}
+    </div>
+    <div class="image-item">
+        {% if count >= 10%}
+            <div class="gray-overlay" style="background-color: rgba(0, 0, 0, 0);">
+                <img src="{% static 'level4.jpeg' %}" alt="Level 4" width="100" height="100" style="filter: grayscale(0%);">
+                <label style="color: #000"><b>Level 4: </b><br>Congrats you made 10+ posts!<br>Whoaaa our pet family RESPECTS your dedication</label>
+            </div>
+        {% else %}
+            <div class="gray-overlay">
+                <img src="{% static 'level4.jpeg' %}" alt="Level 4" width="100" height="100">
+                <label><b>Level 4: </b><br>Congrats you made 10+ posts!<br>Whoaaa our pet family RESPECTS your dedication</label>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

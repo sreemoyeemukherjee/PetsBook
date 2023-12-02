@@ -19,7 +19,7 @@
 {% block header %}Create Post - PetsBook{% endblock %}
 
 {% block content %}
-    <p method="post">
+    <form method="post">
         {% csrf_token %}
         <p>
             <label for="id_title">Title:</label>
