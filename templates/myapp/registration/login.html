@@ -1,0 +1,20 @@
+{% extends 'myapp/base.html' %}
+
+{% block content %}
+    <section id="random-posts">
+        <h2>Sneak Peak</h2>
+        {% for post in random_posts %}
+            <article>
+                <h3>{{ post.title }}</h3>
+                <p>{{ post.description }}</p>
+            </article>
+        {% endfor %}
+    </section>
+    <h2>Login</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Login</button>
+    </form>
+    {{ block.super }}
+{% endblock %}

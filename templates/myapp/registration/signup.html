@@ -1,0 +1,30 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}Sign Up - PetsBook{% endblock %}
+
+{% block header %}Sign Up on PetsBook{% endblock %}
+
+{% block content %}
+    <section id="random-posts">
+        <h2>Sneak Peak</h2>
+        {% for post in random_posts %}
+            <article>
+                <h3>{{ post.title }}</h3>
+                <p>{{ post.description }}</p>
+            </article>
+        {% endfor %}
+    </section>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Sign up</button>
+    </form>
+{% endblock %}
