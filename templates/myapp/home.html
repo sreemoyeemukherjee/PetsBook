@@ -2,7 +2,7 @@
 {% load custom_filters %}
 {% block title %}Home - PetsBook{% endblock %}
 
-{% block header %}Welcome to PetsBook{% endblock %}
+{% block header %}Welcome to PetsBook, {{ user.username }}{% endblock %}
 
 {% block content %}
     <form method="get">
@@ -13,9 +13,8 @@
     {% if query %}
         <h2>Search results for '{{ query }}'</h2>
     {% endif %}
-{#    <p>Time now: {% now "F j, Y H:i:s" %}<br>Last Logged in: {{ user.last_login }}</p>#}
     {% for post in posts %}
-        <h3>{{ post.title }}</h3>
+        <h3><a id={{ post.id }}>{{ post.title }}</a></h3>
         <p>{{ post.description }}</p>
         <p>Category: {{ post.category }}</p>
         {% if user.username != post.username  %}

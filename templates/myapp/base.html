@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}PetsBook{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'styles.css' %}">
-
 </head>
 <body>
 <header>
@@ -18,7 +17,7 @@
                 <li>
                 <div id="notification-icon">
                     <a href="{% url 'messages' %}">Message(s)</a>
-                    <span id="notification-count">0</span>
+                    <span id="notification-circle" {% if user.profile.has_clicked_messages %}style="display: none;"{% endif %}></span>
                 </div>
                 </li>
                 <li><a href="{% url 'home' %}">Home</a></li>

@@ -1,0 +1,11 @@
+{% extends 'myapp/base.html' %}
+
+{% block content %}
+    <h3>Here's what happened since you left</h3>
+    <a href="/addPost">{{ level }}</a><br><br>
+    {% if count > 0 %}
+        {% for post in newposts %}
+                <a href="/#{{ post.id }}">{{ post.message }}</a><br><br>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

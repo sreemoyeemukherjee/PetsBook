@@ -1,5 +1,8 @@
-from django.http import JsonResponse
+from datetime import datetime
+import pytz
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template import Context
+
 from .models import Post
 from .forms import PostForm
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,7 +20,6 @@ from django.contrib.auth.views import LoginView
 def addPost(request):
     if request.method == 'POST':
         form = PostForm(request.POST)
-        print(form)
         if form.is_valid():
             post = form.save(commit=False)
             post.username = request.user.username
@@ -28,11 +30,53 @@ def addPost(request):
     return render(request, 'myapp/addPost.html', {'form': form})
 
 
+@login_required
+def messages(request):
+    request.user.profile.has_clicked_messages = True
+    request.user.profile.save()
+    # new post message(s) logic
+    user = request.user.profile
+    print(user.last_logged_time)
+    print(datetime.now(pytz.utc))
+    posts_between_timestamps = Post.objects.filter(created_at__range=(user.last_logged_time, datetime.now(pytz.utc)))
+    # posts_after_timestamp = Post.objects.filter(created_at__gt=)
+    context = {'count': len(posts_between_timestamps), 'id': [], 'newposts': [], 'level': ""}
+    for post in posts_between_timestamps:
+        context['id'].append(post.id)
+        context['newposts'].append({'id': post.id, 'message': "New Post: " + post.username + " posted about " + post.title})
+    # Badge message logic
+    count = Post.objects.filter(username=request.user).count()
+    if count < 1:
+        context['level'] = "You're " + str(1 - count) + (
+            "post(s) away from unlocking Level 1! What are you waiting for? "
+            "Post now")
+    elif count < 3:
+        context['level'] = "You're " + str(3 - count) + ("post(s) away from unlocking Level 2! What are you waiting "
+                                                         "for?Post now")
+    elif count < 6:
+        context['level'] = "You're " + str(6 - count) + (
+            "post(s) away from unlocking Level 3! What are you waiting for? "
+            "Post now")
+    elif count < 10:
+        context['level'] = "You're " + str(10 - count) + (
+            "post(s) away from unlocking Level 4! What are you waiting for? "
+            "Post now")
+    else:
+        context['level'] = ("Message from Us: Thank you for being a amazing contributor. You have created 10+ "
+                            "posts! Keep posting away!")
+    return render(request, 'myapp/messages.html', context)
+
+
 def home(request):
     return render(request, 'myapp/home.html')
 
 
+@login_required()
 def user_logout(request):
+    # Update last_logged_out_time in  user Profile
+    request.user.profile.has_clicked_messages = False
+    request.user.profile.last_logged_time = datetime.now(pytz.utc)
+    request.user.profile.save()
     logout(request)
     # Redirect to the home page or another page after logout
     return redirect('home')

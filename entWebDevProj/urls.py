@@ -21,10 +21,11 @@ from myapp import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/login/', views.CustomLoginView.as_view(template_name='myapp/registration/login.html'), name='login'),
+    path('login/', views.user_login, name='login'),
+    path('signup/', views.signup, name='signup'),
+    path('messages/', views.messages, name='messages'),
     path('', views.PostListView.as_view(), name='home'),
     path('addPost/', views.addPost, name='addPost'),
     path('badges/', views.badges, name='badges'),
-    path('signup/', views.signup, name='signup'),
-    path('login/', views.user_login, name='login'),
     path('logout/', views.user_logout, name='logout'),
 ]
