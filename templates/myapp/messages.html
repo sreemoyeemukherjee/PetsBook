@@ -1,5 +1,7 @@
 {% extends 'myapp/base.html' %}
 
+{% block header %}Welcome to PetsBook, {{ user.username }}{% endblock %}
+
 {% block content %}
     <h3>Here's what happened since you left</h3>
     <a href="/addPost">{{ level }}</a><br><br>

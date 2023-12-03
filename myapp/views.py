@@ -7,7 +7,7 @@ from .models import Post
 from .forms import PostForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.contrib.auth import authenticate, login, logout
 from .forms import SignUpForm
 from django.contrib.auth.forms import AuthenticationForm
@@ -36,12 +36,10 @@ def messages(request):
     request.user.profile.save()
     # new post message(s) logic
     user = request.user.profile
-    print(user.last_logged_time)
-    print(datetime.now(pytz.utc))
-    posts_between_timestamps = Post.objects.filter(created_at__range=(user.last_logged_time, datetime.now(pytz.utc)))
-    # posts_after_timestamp = Post.objects.filter(created_at__gt=)
+    posts_between_timestamps = Post.objects.filter(created_at__range=(user.last_logged_time, datetime.now(pytz.utc))).exclude(username=request.user)
     context = {'count': len(posts_between_timestamps), 'id': [], 'newposts': [], 'level': ""}
     for post in posts_between_timestamps:
+        # if not post.username.__eq__(request.user):
         context['id'].append(post.id)
         context['newposts'].append({'id': post.id, 'message': "New Post: " + post.username + " posted about " + post.title})
     # Badge message logic
@@ -67,11 +65,7 @@ def messages(request):
     return render(request, 'myapp/messages.html', context)
 
 
-def home(request):
-    return render(request, 'myapp/home.html')
-
-
-@login_required()
+@login_required
 def user_logout(request):
     # Update last_logged_out_time in  user Profile
     request.user.profile.has_clicked_messages = False
@@ -114,9 +108,31 @@ def user_login(request):
     return render(request, 'myapp/registration/login.html', {'form': form, 'random_posts': random_posts})
 
 
+@login_required
 def badges(request):
     count = Post.objects.filter(username=request.user).count()
     return render(request, 'myapp/badges.html', {'count': count})
+
+
+@login_required
+def dashboard(request):
+    context = {}
+    count = Post.objects.filter(username=request.user).count()
+    most_posts_user = Post.objects.values('username').annotate(post_count=Count('id')).order_by('-post_count').first()
+    print(most_posts_user['post_count'])
+    context['count'] = count
+    context['top'] = round(100 - 100*count/most_posts_user['post_count'], 2)
+    if count < 1:
+        context['level'] = 0
+    elif count < 3:
+        context['level'] = 1
+    elif count < 6:
+        context['level'] = 2
+    elif count < 10:
+        context['level'] = 3
+    else:
+        context['level'] = 4
+    return render(request, 'myapp/dashboard.html', context)
 
 
 class PostListView(LoginRequiredMixin, View):

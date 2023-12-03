@@ -23,6 +23,7 @@
                 <li><a href="{% url 'home' %}">Home</a></li>
                 <li><a href="{% url 'addPost' %}">New Post</a></li>
                 <li><a href="{% url 'badges' %}">Badges</a></li>
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
                 <li><a href="{% url 'logout' %}">Logout</a></li>
             {% else %}
                 <li>Existing PetsBooker? <a href="{% url 'login' %}">Login</a></li>
@@ -37,7 +38,7 @@
 </main>
 
 <footer>
-    <p>&copy; 2023 PetsBook</p>
+    <p>&copy; 2023 PetsBook - author: Sreemoyee</p>
 </footer>
 </body>
 </html>

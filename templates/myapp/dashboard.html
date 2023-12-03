@@ -1,0 +1,30 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}Dashboard - PetsBook{% endblock %}
+
+{% block header %}Your Stats{% endblock %}
+
+{% block content %}
+    <h2>Dashboard</h2>
+
+    <div class="dashboard-metrics">
+        <div class="metric">
+            <h3>Level</h3>
+            <p class="metric-value">{{ level }}</p>
+        </div>
+
+        <div class="metric">
+            <h3>Posts</h3>
+            <p class="metric-value">{{ count }}</p>
+        </div>
+
+        <div class="metric">
+            <h3>Based on your activity you're in the top</h3>
+            {% if top == 0 %}
+            <p class="metric-value">1%</p>
+            {% else %}
+                <p class="metric-value">{{ top }}%</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
