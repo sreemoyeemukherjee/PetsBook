@@ -1,3 +1,6 @@
+import csv
+import os
+import sys
 from datetime import datetime
 import pytz
 from django.db import connection
@@ -15,7 +18,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-
+from external_programs import user_profile
 
 @login_required
 def addPost(request):
@@ -152,7 +155,7 @@ def dashboard(request):
 class PostListView(LoginRequiredMixin, View):
     def get(self, request):
         query = request.GET.get('q')
-        posts = self.query_db(query)
+        posts = self.sort_results(request, self.query_db(query))
         return render(request, 'myapp/home.html', {'posts': posts, 'query': query})
 
     def post(self, request):
@@ -187,7 +190,7 @@ class PostListView(LoginRequiredMixin, View):
                 post.favorites.add(request.user)
                 post.save()
         query = request.GET.get('q')
-        posts = self.query_db(query)
+        posts = self.sort_results(request, self.query_db(query))
         return render(request, 'myapp/home.html', {'posts': posts, 'query': query})
 
     def query_db(self, query):
@@ -199,10 +202,41 @@ class PostListView(LoginRequiredMixin, View):
                 Q(tags__icontains=query)
             )
         else:
-            posts = Post.objects.all().order_by('-like_count') # TODO: sort on basis of user profile
+            # posts = Post.objects.all().order_by('-like_count') # TODO: sort on basis of user profile
+            posts = Post.objects.all()
         return posts
 
+    def read_user_profile(self, request):
+        try:
+            filename = sys.path[0] + "/user_profiles/user_profile_" + str(request.user.id) + ".csv"
+            word_average_dict = {}
+            with open(filename, mode='r') as file:
+                csv_reader  = csv.DictReader(file, delimiter=',')
+                for row in csv_reader:
+                    if len(row) == 2:
+                        word = row['Word'].strip().lower()
+                        average = float(row['Average'])
+                        word_average_dict[word] = average
+            return word_average_dict
+        except:
+            pass
+    def sort_results(self, request, posts):
+        post_scores = []
+        for post in posts:
+            score = 0.0
+            keywords = user_profile.clean_text(post.title)
+            for keyword in keywords.split(' '):
+                profile_dict = self.read_user_profile(request)
+                if profile_dict:
+                    score += profile_dict.get(keyword, 0.0)
+            post_scores.append((post, score, post.like_count))
+        # Sort the list of tuples based on scores in decreasing order
+        sorted_post_scores = sorted(post_scores, key=lambda x: (x[1], x[2]), reverse=True)
 
+        # Extract the sorted posts from the sorted tuples
+        sorted_posts = [post for post, _, _ in sorted_post_scores]
+
+        return sorted_posts
 class CustomLoginView(LoginView):
     def get(self, request, *args, **kwargs):
         # If a custom 'next' parameter is specified in the URL, use it
