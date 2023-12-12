@@ -13,6 +13,13 @@ class Post(models.Model):
     tags = models.CharField(max_length=200, blank=True, null=True)
     is_flagged = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)
+    favorites = models.ManyToManyField(User, related_name='favorited_posts', blank=True)
+    like_count = models.IntegerField(default=0)  # New field for like count
+
+    def update_like_count(self):
+        self.like_count = self.likes.count()
+        # self.save()
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

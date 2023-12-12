@@ -1,5 +1,6 @@
 from datetime import datetime
 import pytz
+from django.db import connection
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template import Context
 
@@ -38,6 +39,16 @@ def messages(request):
     user = request.user.profile
     posts_between_timestamps = Post.objects.filter(created_at__range=(user.last_logged_time, datetime.now(pytz.utc))).exclude(username=request.user)
     context = {'count': len(posts_between_timestamps), 'id': [], 'newposts': [], 'level': ""}
+    # Suggestions logic:
+    with connection.cursor() as cursor:
+        # Execute a raw SQL query to select data from the suggestions table for the current user
+        query = f"""SELECT * FROM suggestions WHERE user_id = {request.user.id}"""
+        # print(query)
+        cursor.execute(query)
+
+        # Fetch all rows from the result set
+        suggestions = cursor.fetchall()
+        context['suggestions'] = suggestions
     for post in posts_between_timestamps:
         # if not post.username.__eq__(request.user):
         context['id'].append(post.id)
@@ -113,7 +124,10 @@ def badges(request):
     count = Post.objects.filter(username=request.user).count()
     return render(request, 'myapp/badges.html', {'count': count})
 
-
+@login_required
+def favorites(request):
+    favorite_posts = Post.objects.filter(favorites=request.user)
+    return render(request, 'myapp/favorites.html', {'posts': favorite_posts})
 @login_required
 def dashboard(request):
     context = {}
@@ -163,6 +177,15 @@ class PostListView(LoginRequiredMixin, View):
                 if not post.is_flagged:
                     post.is_flagged = True
                     post.save()
+            elif request.POST.get('action') == 'like':
+                post = get_object_or_404(Post, pk=post_id)
+                post.likes.add(request.user)
+                post.update_like_count()
+                post.save()
+            elif request.POST.get('action') == 'favorite':
+                post = get_object_or_404(Post, pk=post_id)
+                post.favorites.add(request.user)
+                post.save()
         query = request.GET.get('q')
         posts = self.query_db(query)
         return render(request, 'myapp/home.html', {'posts': posts, 'query': query})
@@ -176,7 +199,7 @@ class PostListView(LoginRequiredMixin, View):
                 Q(tags__icontains=query)
             )
         else:
-            posts = Post.objects.all()
+            posts = Post.objects.all().order_by('-like_count') # TODO: sort on basis of user profile
         return posts
 
 

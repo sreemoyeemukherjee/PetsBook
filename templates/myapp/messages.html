@@ -10,4 +10,9 @@
                 <a href="/#{{ post.id }}">{{ post.message }}</a><br><br>
         {% endfor %}
     {% endif %}
+    {% if suggestions %}
+    {% for suggestion in suggestions %}
+        <a href="/#{{ suggestion.2 }}">Here's some related content you might like: {{ suggestion.3 }}</a><br><br>
+    {% endfor %}
+    {% endif %}
 {% endblock %}

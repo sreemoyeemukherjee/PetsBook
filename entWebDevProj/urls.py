@@ -27,6 +27,7 @@ urlpatterns = [
     path('', views.PostListView.as_view(), name='home'),
     path('addPost/', views.addPost, name='addPost'),
     path('badges/', views.badges, name='badges'),
+    path('favorites/', views.favorites, name='favorites'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('logout/', views.user_logout, name='logout'),
 ]

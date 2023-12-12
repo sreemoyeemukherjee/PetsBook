@@ -21,6 +21,21 @@
             <p>Author: {{ post.username }}</p>
             <form method="post">
                 {% csrf_token %}
+                <!-- Like button -->
+                {% if user in post.likes.all %}
+{#                    <button type="submit" name="action" value="unlike">Unlike</button>#}
+                    <label style="color: blue">Liked</label>
+                {% else %}
+                    <button type="submit" name="action" value="like">Like</button>
+                {% endif %}
+                <!-- Favorite button -->
+                {% if user in post.favorites.all %}
+                    <label style="color: gold; background-color: red">Favorited</label>
+                {% else %}
+                    <button type="submit" name="action" value="favorite">Favorite</button>
+                {% endif %}
+
+
                 {% if not post.is_flagged %}
                     <button type="submit" name="action" value="flag">Flag</button>
                 {% else %}
